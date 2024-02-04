@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "cpu_6502"
+name = "rusty_6502"
 version = "0.1.0"

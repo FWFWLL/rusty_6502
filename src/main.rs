@@ -56,9 +56,9 @@ impl PS {
     const N: u8 = 0b10000000; // Negative Flag
 }
 
-struct INS;
+struct Ins;
 
-impl INS {
+impl Ins {
     const LDA_IM: u8 = 0xA9;  // Load Accumulator - Immediate
     const LDA_ZP: u8 = 0xA5;  // Load Accumulator - Zero Page
     const LDA_ZPX: u8 = 0xB5;  // Load Accumulator - Zero Page,X
@@ -100,7 +100,7 @@ impl CPU {
         let mut data = memory[self.pc] as u16;
         self.pc += 1;
 
-        data |= ((memory[self.pc] as u16) << 8) as u16;
+        data |= (memory[self.pc] as u16) << 8;
         self.pc += 1;
 
         *cycles -= 2;
@@ -119,22 +119,22 @@ impl CPU {
         let mut cycles = cycles;
         while cycles > 0 {
             match self.fetch_byte(&mut cycles, memory) {
-                INS::LDA_IM => {
+                Ins::LDA_IM => {
                     self.a = self.fetch_byte(&mut cycles, memory);
                     self.lda_set_status();
                 },
-                INS::LDA_ZP => {
+                Ins::LDA_ZP => {
                     let zp_addr = self.fetch_byte(&mut cycles, memory);
                     self.a = self.read_byte(&mut cycles, memory, zp_addr);
                     self.lda_set_status();
                 },
-                INS::LDA_ZPX => {
+                Ins::LDA_ZPX => {
                     let mut zp_addr = self.fetch_byte(&mut cycles, memory);
                     zp_addr += self.x; cycles -= 1;
                     self.a = self.read_byte(&mut cycles, memory, zp_addr);
                     self.lda_set_status();
                 },
-                INS::JSR_ABS => {
+                Ins::JSR_ABS => {
                     let sub_addr = self.fetch_word(&mut cycles, memory); // Takes 2 cycles
                     memory.write_word(&mut cycles, self.pc - 1, self.sp); // Takes 2 cycles
                     self.sp += 2;
@@ -158,11 +158,11 @@ fn main() {
     cpu.reset(&mut memory);
 
     // START - Inlined program for testing
-    memory[0xFFFC] = INS::JSR_ABS; // 6 Cycles
+    memory[0xFFFC] = Ins::JSR_ABS; // 6 Cycles
     memory[0xFFFD] = 0x42;
     memory[0xFFFE] = 0x42;
 
-    memory[0x4242] = INS::LDA_IM; // 2 Cycles
+    memory[0x4242] = Ins::LDA_IM; // 2 Cycles
     memory[0x4243] = 0x84;
     // END - Inlined program for testing
 
